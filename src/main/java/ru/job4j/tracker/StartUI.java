@@ -14,7 +14,7 @@ import java.util.List;
 
 public class StartUI {
 
-    public void init(Input input, MemTracker tracker, List<UserAction> actions) {
+    public void init(Input input, Store tracker, List<UserAction> actions) {
         boolean run = true;
         while (run) {
             showMenu(actions);
@@ -36,7 +36,6 @@ public class StartUI {
         Input input = new ValidateInput(
                 new ConsoleInput()
         );
-        MemTracker memTracker = new MemTracker();
         Output output = new ConsoleOutput();
         try (Store tracker = new SqlTracker()) {
             tracker.init();
@@ -49,7 +48,7 @@ public class StartUI {
                     new FindByNameAction(output),
                     new ExitAction()
             );
-            new StartUI().init(input, memTracker, actions);
+            new StartUI().init(input, tracker, actions);
         } catch (Exception e) {
             e.printStackTrace();
         }

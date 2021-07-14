@@ -30,7 +30,7 @@ public class SqlTracker implements Store {
 
     @Override
     public Item add(Item item) {
-        try (PreparedStatement statement = cn.prepareStatement("insert into items(name) values (?)",Statement.RETURN_GENERATED_KEYS)) {
+        try (PreparedStatement statement = cn.prepareStatement("insert into items(name, created) values (?, ?)",Statement.RETURN_GENERATED_KEYS)) {
             statement.setString(1, item.getName());
             try (ResultSet rs = statement.executeQuery()) {
                 if (rs.next()) {
@@ -51,9 +51,14 @@ public class SqlTracker implements Store {
     @Override
     public boolean replace(int id, Item item) {
         boolean rsl = false;
-        try (PreparedStatement statement = cn.prepareStatement("update items set name = ? where id = ?")) {
+        try (PreparedStatement statement = cn.prepareStatement("update items set name = ? set created = ? where id = ?")) {
             statement.setString(1, item.getName());
-            statement.setInt(2, id);
+            long time = System.currentTimeMillis();
+            Timestamp timestamp = new Timestamp(time);
+            LocalDateTime localDateTime = timestamp.toLocalDateTime();
+            Timestamp timestampFromLDT = Timestamp.valueOf(localDateTime);
+            statement.setTimestamp(2, timestampFromLDT);
+            statement.setInt(3, id);
             statement.execute();
             rsl = statement.executeUpdate() > 0;
         } catch (Exception e) {
@@ -71,7 +76,7 @@ public class SqlTracker implements Store {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return false;
+        return rsl;
     }
 
     @Override
@@ -80,16 +85,19 @@ public class SqlTracker implements Store {
         try (PreparedStatement statement = cn.prepareStatement("select * from items")) {
             try (ResultSet rs = statement.executeQuery()) {
                 while (rs.next()) {
+                    Timestamp time = rs.getTimestamp("created");
+                    LocalDateTime dateTime = time.toLocalDateTime();
                     rsl.add(new Item(
                             rs.getString("name"),
-                            rs.getInt("id")
+                            rs.getInt("id"),
+                            dateTime
                     ));
                 }
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return null;
+        return rsl;
     }
 
     @Override
@@ -99,8 +107,12 @@ public class SqlTracker implements Store {
             statement.setString(1, key);
             try (ResultSet rs = statement.executeQuery()) {
                 while (rs.next()) {
+                    Timestamp time = rs.getTimestamp("created");
+                    LocalDateTime dateTime = time.toLocalDateTime();
                     rsl.add(new Item(
-                            rs.getString("name")
+                            rs.getString("name"),
+                            rs.getInt("id"),
+                            dateTime
                     ));
                 }
             }
@@ -116,7 +128,9 @@ public class SqlTracker implements Store {
             statement.setInt(1, id);
             try (ResultSet rs = statement.executeQuery()) {
                 if (rs.next()) {
-                    return new Item(rs.getString("name"), rs.getInt("id"));
+                    return new Item(
+                            rs.getString("name"),
+                            rs.getInt("id"));
                 }
             }
         } catch (Exception e) {
