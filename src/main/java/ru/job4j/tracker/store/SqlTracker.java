@@ -37,11 +37,7 @@ public class SqlTracker implements Store {
                     item.setId(rs.getInt(1));
                 }
             }
-            long time = System.currentTimeMillis();
-            Timestamp timestamp = new Timestamp(time);
-            LocalDateTime localDateTime = timestamp.toLocalDateTime();
-            Timestamp timestampFromLDT = Timestamp.valueOf(localDateTime);
-            statement.setTimestamp(2, timestampFromLDT);
+            statement.setTimestamp(2, Timestamp.valueOf(item.getCreated()));
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -53,11 +49,7 @@ public class SqlTracker implements Store {
         boolean rsl = false;
         try (PreparedStatement statement = cn.prepareStatement("update items set name = ? set created = ? where id = ?")) {
             statement.setString(1, item.getName());
-            long time = System.currentTimeMillis();
-            Timestamp timestamp = new Timestamp(time);
-            LocalDateTime localDateTime = timestamp.toLocalDateTime();
-            Timestamp timestampFromLDT = Timestamp.valueOf(localDateTime);
-            statement.setTimestamp(2, timestampFromLDT);
+            statement.setTimestamp(2, Timestamp.valueOf(item.getCreated()));
             statement.setInt(3, id);
             statement.execute();
             rsl = statement.executeUpdate() > 0;
@@ -124,19 +116,22 @@ public class SqlTracker implements Store {
 
     @Override
     public Item findById(int id) {
+        Item item = null;
         try (PreparedStatement statement = cn.prepareStatement("select * from items where id = ?")) {
             statement.setInt(1, id);
             try (ResultSet rs = statement.executeQuery()) {
                 if (rs.next()) {
-                    return new Item(
-                            rs.getString("name"),
-                            rs.getInt("id"));
+                    Timestamp time = rs.getTimestamp("created");
+                    LocalDateTime dateTime = time.toLocalDateTime();
+                    item.setName(rs.getString("name"));
+                    item.setId(rs.getInt("id"));
+                    item.setCreated(dateTime);
                 }
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return null;
+        return item;
     }
 
     @Override
