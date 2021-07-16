@@ -32,12 +32,12 @@ public class SqlTracker implements Store {
     public Item add(Item item) {
         try (PreparedStatement statement = cn.prepareStatement("insert into items(name, created) values (?, ?)",Statement.RETURN_GENERATED_KEYS)) {
             statement.setString(1, item.getName());
+            statement.setTimestamp(2, Timestamp.valueOf(item.getCreated()));
             try (ResultSet rs = statement.executeQuery()) {
                 if (rs.next()) {
                     item.setId(rs.getInt(1));
                 }
             }
-            statement.setTimestamp(2, Timestamp.valueOf(item.getCreated()));
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -51,7 +51,6 @@ public class SqlTracker implements Store {
             statement.setString(1, item.getName());
             statement.setTimestamp(2, Timestamp.valueOf(item.getCreated()));
             statement.setInt(3, id);
-            statement.execute();
             rsl = statement.executeUpdate() > 0;
         } catch (Exception e) {
             e.printStackTrace();
@@ -111,7 +110,7 @@ public class SqlTracker implements Store {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return null;
+        return rsl;
     }
 
     @Override
