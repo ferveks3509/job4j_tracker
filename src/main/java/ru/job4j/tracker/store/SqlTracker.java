@@ -9,10 +9,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
-public class SqlTracker implements Store {
+public class SqlTracker implements Store,AutoCl {
     private Connection cn;
 
-    @Override
     public void init() {
         try (InputStream in = SqlTracker.class.getClassLoader().getResourceAsStream("app.properties")) {
             Properties config = new Properties();
@@ -131,7 +130,6 @@ public class SqlTracker implements Store {
         return item;
     }
 
-    @Override
     public void close() throws Exception {
         if (cn != null) {
             cn.close();
