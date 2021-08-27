@@ -79,9 +79,8 @@ public class SqlTracker implements Store {
                     Timestamp time = rs.getTimestamp("created");
                     LocalDateTime dateTime = time.toLocalDateTime();
                     rsl.add(new Item(
-                            rs.getString("name"),
-                            rs.getInt("id"),
-                            dateTime
+                            rs.getInt(1),
+                            rs.getString("name")
                     ));
                 }
             }
@@ -101,9 +100,8 @@ public class SqlTracker implements Store {
                     Timestamp time = rs.getTimestamp("created");
                     LocalDateTime dateTime = time.toLocalDateTime();
                     rsl.add(new Item(
-                            rs.getString("name"),
-                            rs.getInt("id"),
-                            dateTime
+                            rs.getInt(1),
+                            rs.getString("name")
                     ));
                 }
             }
