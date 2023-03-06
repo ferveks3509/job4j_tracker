@@ -39,7 +39,6 @@ public class HibernateRun {
         session.close();
         return item;
     }
-
     public static void update(Item item, SessionFactory sf) {
         Session session = sf.openSession();
         session.beginTransaction();
@@ -47,7 +46,6 @@ public class HibernateRun {
         session.getTransaction().commit();
         session.close();
     }
-
     public static void delete(Integer id, SessionFactory sf) {
         Session session = sf.openSession();
         session.beginTransaction();
