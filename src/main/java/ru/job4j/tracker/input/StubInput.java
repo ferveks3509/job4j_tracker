@@ -28,5 +28,4 @@ public class StubInput implements Input {
         }
         return select;
     }
-
 }
