@@ -12,7 +12,11 @@ import java.util.Properties;
 public class SqlTracker implements Store,AutoCl {
     private Connection cn;
 
-    public void init() {
+    public SqlTracker(Connection cn) {
+        this.cn = cn;
+    }
+
+    private void init() {
         try (InputStream in = SqlTracker.class.getClassLoader().getResourceAsStream("app.properties")) {
             Properties config = new Properties();
             config.load(in);
@@ -23,22 +27,24 @@ public class SqlTracker implements Store,AutoCl {
                     config.getProperty("password")
             );
         } catch (Exception e) {
-            throw new IllegalStateException(e);
+            e.printStackTrace();
         }
     }
 
     @Override
     public Item add(Item item) {
-        try (PreparedStatement statement = cn.prepareStatement("insert into items(name, created) values (?, ?)",Statement.RETURN_GENERATED_KEYS)) {
+        try (PreparedStatement statement = cn.prepareStatement("insert into items(name, created) values (?, ?)",
+                Statement.RETURN_GENERATED_KEYS)) {
             statement.setString(1, item.getName());
             statement.setTimestamp(2, Timestamp.valueOf(item.getCreated()));
-            try (ResultSet rs = statement.executeQuery()) {
+            statement.execute();
+            try (ResultSet rs = statement.getGeneratedKeys()) {
                 if (rs.next()) {
                     item.setId(rs.getInt(1));
                 }
             }
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
         }
         return item;
     }
@@ -46,7 +52,7 @@ public class SqlTracker implements Store,AutoCl {
     @Override
     public boolean replace(int id, Item item) {
         boolean rsl = false;
-        try (PreparedStatement statement = cn.prepareStatement("update items set name = ? set created = ? where id = ?")) {
+        try (PreparedStatement statement = cn.prepareStatement("update items set name = ?, created = ? where id = ?")) {
             statement.setString(1, item.getName());
             statement.setTimestamp(2, Timestamp.valueOf(item.getCreated()));
             statement.setInt(3, id);
@@ -71,65 +77,65 @@ public class SqlTracker implements Store,AutoCl {
 
     @Override
     public List<Item> findAll() {
-        List<Item> rsl = new ArrayList<>();
+        List<Item> items = new ArrayList<>();
         try (PreparedStatement statement = cn.prepareStatement("select * from items")) {
             try (ResultSet rs = statement.executeQuery()) {
                 while (rs.next()) {
-                    Timestamp time = rs.getTimestamp("created");
-                    LocalDateTime dateTime = time.toLocalDateTime();
-                    rsl.add(new Item(
-                            rs.getInt(1),
-                            rs.getString("name")
+                    items.add(new Item(
+                            rs.getInt("id"),
+                            rs.getString("name"),
+                            rs.getTimestamp("created").toLocalDateTime()
                     ));
                 }
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return rsl;
+        return items;
     }
 
     @Override
     public List<Item> findByName(String key) {
-        List<Item> rsl = new ArrayList<>();
-        try (PreparedStatement statement = cn.prepareStatement("select * from items where name = ?")) {
-            statement.setString(1, key);
+        List<Item> items = new ArrayList<>();
+        try (PreparedStatement statement = cn.prepareStatement("select * from items i where name = ?")) {
             try (ResultSet rs = statement.executeQuery()) {
                 while (rs.next()) {
-                    Timestamp time = rs.getTimestamp("created");
-                    LocalDateTime dateTime = time.toLocalDateTime();
-                    rsl.add(new Item(
-                            rs.getInt(1),
-                            rs.getString("name")
+                    items.add(new Item(
+                            rs.getInt("id"),
+                            rs.getString("name"),
+                            rs.getTimestamp("created").toLocalDateTime()
                     ));
                 }
             }
+            statement.setString(1, key);
+            statement.execute();
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return rsl;
+        return items;
     }
 
     @Override
     public Item findById(int id) {
-        Item item = null;
+        Item item = new Item();
         try (PreparedStatement statement = cn.prepareStatement("select * from items where id = ?")) {
             statement.setInt(1, id);
+            statement.execute();
             try (ResultSet rs = statement.executeQuery()) {
                 if (rs.next()) {
-                    Timestamp time = rs.getTimestamp("created");
-                    LocalDateTime dateTime = time.toLocalDateTime();
-                    item.setName(rs.getString("name"));
                     item.setId(rs.getInt("id"));
-                    item.setCreated(dateTime);
+                    item.setName(rs.getString("name"));
+                    item.setCreated(rs.getTimestamp("created").toLocalDateTime());
                 }
             }
+
         } catch (Exception e) {
             e.printStackTrace();
         }
         return item;
     }
 
+    @Override
     public void close() throws Exception {
         if (cn != null) {
             cn.close();

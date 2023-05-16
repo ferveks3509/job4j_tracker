@@ -5,20 +5,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-public class MemTracker {
+public class MemTracker implements Store {
 
     private final List<Item> items = new ArrayList<>();
-
-    private int id = 0;
+    private int ids = 0;
 
     public Item add(Item item) {
-        item.setId(id++);
+        item.setId(ids++);
         items.add(item);
         return item;
-    }
-
-    public List<Item> findAll() {
-        return items;
     }
 
     public Item findById(int id) {
@@ -26,44 +21,54 @@ public class MemTracker {
         return index != -1 ? items.get(index) : null;
     }
 
+    public List<Item> findAll() {
+        return items;
+    }
+
     public List<Item> findByName(String key) {
-        List<Item> result = new ArrayList<>();
+        List<Item> rsl = new ArrayList<>();
         for (Item item : items) {
-            if (key.equals(item.getName())) {
-                result.add(item);
+            if (item.getName().equals(key)) {
+                rsl.add(item);
             }
         }
-        return result;
+        return rsl;
     }
 
     public boolean replace(int id, Item item) {
         int index = indexOf(id);
-        if (index == -1) {
-            return false;
+        boolean rsl = index != -1;
+        if (rsl) {
+            item.setId(id);
+            items.add(index, item);
+            items.remove(index + 1);
         }
-        item.setId(id);
-        items.set(index, item);
-        return true;
+        return rsl;
     }
 
     public boolean delete(int id) {
         int index = indexOf(id);
-        if (index == -1) {
-            return false;
+        boolean rsl = index != -1;
+        if (rsl) {
+            items.remove(index);
         }
-        items.remove(index);
-        return true;
+        return rsl;
     }
 
     private int indexOf(int id) {
-        int index = -1;
+        int rsl = -1;
         for (int i = 0; i < items.size(); i++) {
-            if (items.get(i).getId() == id) {
-                index = i;
+            Item value = items.get(i);
+            if (value.getId() == id) {
+                rsl = i;
                 break;
             }
         }
-        return index;
+        return rsl;
     }
 
+    @Override
+    public void close() throws Exception {
+
+    }
 }
