@@ -1,9 +1,6 @@
 package ru.job4j.tracker.model;
 
 
-import javax.persistence.*;
-
-import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Objects;
