@@ -7,6 +7,7 @@ import ru.job4j.tracker.input.ValidateInput;
 import ru.job4j.tracker.output.ConsoleOutput;
 import ru.job4j.tracker.output.Output;
 import ru.job4j.tracker.store.HbmTracker;
+import ru.job4j.tracker.store.SqlTracker;
 import ru.job4j.tracker.store.Store;
 
 import java.util.List;
@@ -42,7 +43,7 @@ public class Main {
     public static void main(String[] args) {
         Output output = new ConsoleOutput();
         Input input = new ValidateInput(output, new ConsoleInput());
-        try (Store memTracker = new HbmTracker()) {
+        try (Store memTracker = new SqlTracker()) {
             List<UserAction> actions = List.of(
                     new CreateAction(output),
                     new ShowAllAction(output),

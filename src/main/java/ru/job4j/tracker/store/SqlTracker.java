@@ -2,6 +2,7 @@ package ru.job4j.tracker.store;
 
 import ru.job4j.tracker.model.Item;
 
+import java.io.FileInputStream;
 import java.io.InputStream;
 import java.sql.*;
 import java.time.LocalDateTime;
@@ -12,12 +13,16 @@ import java.util.Properties;
 public class SqlTracker implements Store,AutoCl {
     private Connection cn;
 
+    public SqlTracker() {
+        init();
+    }
+
     public SqlTracker(Connection cn) {
         this.cn = cn;
     }
 
     private void init() {
-        try (InputStream in = SqlTracker.class.getClassLoader().getResourceAsStream("app.properties")) {
+        try (InputStream in = new FileInputStream("db/liquibase.properties")) {
             Properties config = new Properties();
             config.load(in);
             Class.forName(config.getProperty("driver-class-name"));
