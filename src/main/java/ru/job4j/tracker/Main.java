@@ -7,15 +7,14 @@ import ru.job4j.tracker.input.ValidateInput;
 import ru.job4j.tracker.output.ConsoleOutput;
 import ru.job4j.tracker.output.Output;
 import ru.job4j.tracker.store.HbmTracker;
-import ru.job4j.tracker.store.MemTracker;
 import ru.job4j.tracker.store.Store;
 
 import java.util.List;
 
-public class StartUI {
+public class Main {
     private final Output out;
 
-    public StartUI(Output out) {
+    public Main(Output out) {
         this.out = out;
     }
 
@@ -53,7 +52,7 @@ public class StartUI {
                     new FindByNameAction(output),
                     new ExitAction(output)
             );
-            new StartUI(output).init(input, memTracker, actions);
+            new Main(output).init(input, memTracker, actions);
         } catch (Exception e) {
             e.printStackTrace();
         }

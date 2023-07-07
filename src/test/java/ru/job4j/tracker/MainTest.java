@@ -15,7 +15,7 @@ import java.util.List;
 import static org.assertj.core.api.Java6Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
-class StartUITest {
+class MainTest {
 
     @Test
     void whenCreateItem() {
@@ -28,7 +28,7 @@ class StartUITest {
                 new CreateAction(output),
                 new ExitAction(output)
         );
-        new StartUI(output).init(input, memTracker, actions);
+        new Main(output).init(input, memTracker, actions);
         assertEquals(memTracker.findAll().get(0).getName(), "Item");
     }
 
@@ -44,7 +44,7 @@ class StartUITest {
                 new EditAction(output),
                 new ExitAction(output)
         );
-        new StartUI(output).init(input, memTracker, actions);
+        new Main(output).init(input, memTracker, actions);
         assertEquals(memTracker.findAll().get(0).getName(), "New name");
     }
 
@@ -60,7 +60,7 @@ class StartUITest {
                 new DeleteAction(output),
                 new ExitAction(output)
         );
-        new StartUI(output).init(input, memTracker, actions);
+        new Main(output).init(input, memTracker, actions);
         assertNull(memTracker.findById(item.getId()));
     }
 
@@ -74,7 +74,7 @@ class StartUITest {
         List<UserAction> actions = List.of(
                 new ExitAction(out)
         );
-        new StartUI(out).init(in, memTracker, actions);
+        new Main(out).init(in, memTracker, actions);
         assertThat(out.toString()).isEqualTo(
                 "Menu:" + System.lineSeparator()
                         + "0. Exit Program" + System.lineSeparator()
@@ -95,7 +95,7 @@ class StartUITest {
                 new EditAction(out),
                 new ExitAction(out)
         );
-        new StartUI(out).init(in, memTracker, actions);
+        new Main(out).init(in, memTracker, actions);
         String ln = System.lineSeparator();
         assertThat(out.toString()).isEqualTo(
                 "Menu:" + ln
@@ -120,7 +120,7 @@ class StartUITest {
         List<UserAction> actions = List.of(
                 new ExitAction(out)
         );
-        new StartUI(out).init(in, memTracker, actions);
+        new Main(out).init(in, memTracker, actions);
         String ln = System.lineSeparator();
         assertThat(out.toString()).isEqualTo(
                 "Menu:" + ln
