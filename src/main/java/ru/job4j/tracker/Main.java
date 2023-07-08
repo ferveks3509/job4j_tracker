@@ -76,7 +76,8 @@ public class Main {
     public static void main(String[] args) {
         Output output = new ConsoleOutput();
         Input input = new ValidateInput(output, new ConsoleInput());
-        try (Store memTracker = new SqlTracker()) {
+        try (Store memTracker = new SqlTracker();
+            Connection connection = loadConnection()) {
             List<UserAction> actions = List.of(
                     new CreateAction(output),
                     new ShowAllAction(output),
